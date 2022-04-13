@@ -1,0 +1,611 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>相册个性定制系统</title>
+<link rel="stylesheet" href="css/jquery.ui.resizable.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/bookblock.css" />
+<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.10.1.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.json-2.4.js"></script>
+<script type="text/javascript" src="SWFUpload/swfupload_fp10/swfupload.js"></script>
+<script type="text/javascript" src="js/font.js"></script>
+<script type="text/javascript">
+function clearLetter(p){
+	var reg=/[^\d|.|-]/g;
+	if(reg.test(p)){
+		p=p.replace(reg,"");
+	}
+	return Number(p);
+}
+function getTop(o){
+    var osTop=o.offsetTop;
+    if(o.offsetParent!=null){
+		osTop+=getTop(o.offsetParent);
+	}
+    return osTop;
+}
+function getLeft(o){
+    var osLeft=o.offsetLeft;
+    if(o.offsetParent!=null){
+		osLeft+=getLeft(o.offsetParent);
+	}
+    return osLeft;
+}
+function Switch(t,id1,id2,ele1,ele2){
+	var a_con=$("#"+id1+" > "+ele1);
+	var ct=$("#"+id2+" > "+ele2);
+	if($(t).hasClass("current")){return;}
+	else {
+		for(var i=0;i<a_con.length;i++){
+			a_con[i].num=i;
+		}
+		a_con.removeClass("current");
+		$(t).addClass("current");
+		ct.hide();
+		ct.eq(t.num).show();
+	}
+}
+function inSwitch(t){
+	var dt = $(t), _dt = $("#menu dt"), sum = 0;
+	if(dt.hasClass("current")){return;}
+	else {
+		dt.parent().addClass("current").siblings().removeClass("current");
+		dt.next().show().parent().siblings().find("dd").hide();
+	}
+	for(var i=0;i<_dt.length;i++){
+		sum += _dt.eq(i).outerHeight();
+	}
+	$("#menu dd").height($("#menu").height() - sum - 20);
+}
+</script>
+</head>
+<body>
+<script type="text/javascript">
+$("body").prepend("<div class='progressbarbox'><div class='progressbar'><span></span><div class='loading'></div><div class='tips'>正在进入定制系统...</div></div></div>");
+$(".progressbarbox").width($("body").outerWidth()).height($("body").outerHeight());
+var perc = 0, span = $(".progressbar span"), loading = $(".loading");
+function progress(){
+	if(perc < 100){
+		perc++;
+		span.css("width",perc+"%");
+		loading.html("Loading..."+"&nbsp;&nbsp;&nbsp;&nbsp;"+perc+"%");
+	}
+	else {
+		$(".progressbarbox").remove();
+	}
+	setTimeout(progress, 30);
+}
+progress();
+</script>
+<div class="headbox">
+  <div class="left">标清照片书8寸方款</div>
+  <div class="right">
+    <ul>
+      <li>欢迎您，yang_1cd&nbsp;&nbsp;[ <a href="#">退出</a> ]</li>
+      <li><a href="#">我的作品</a></li>
+      <li><a href="#">我的购物车</a></li>
+      <li><a href="#">魔豆网首页</a></li>
+      <li><a href="#">帮助</a></li>
+    </ul>
+  </div>
+</div>
+<div class="wp customize">
+  <div class="left" id="menu">
+    <dl class="fonts">
+      <dt onclick="inSwitch(this)" class="first"><i></i><span>文字</span>Font</dt>
+      <dd style="display: none;">
+        <img src="images/dabiao.png" class="dabiao" />
+        <img src="images/zhongbiao.png" class="zhongbiao" />
+        <img src="images/xiaobiao.png" class="xiaobiao" />
+        <img src="images/neiwen.png" class="neiwen" />
+      </dd>
+    </dl>
+    <dl class="background">
+      <dt onclick="inSwitch(this)"><i></i><span>背景</span>Background</dt>
+      <dd style="display: none;">
+        <img src="background/bg_libs_1100_550_01.jpg" />
+        <img src="background/bg_libs_1100_550_02.jpg" />
+        <img src="background/bg_libs_1100_550_03.jpg" />
+        <img src="background/bg_libs_1100_550_04.jpg" />
+      </dd>
+    </dl>
+    <dl class="imgsrc current">
+      <dt onclick="inSwitch(this)"><i></i><span>图片</span>Photo</dt>
+      <dd>
+        <div id="uploadbutton"></div>
+        <div class="hideused"><label><input type="checkbox" />隐藏使用过的照片</label></div>
+        <div class="ct_box clearfix"></div>
+      </dd>
+    </dl>
+  </div>
+  <div class="right" id="editarea">
+    <div class="toolbarbox">
+      <div id="toolbar" class="clearfix">
+        <ul class="operate">
+          <li class="save" title="保存"></li>
+          <li class="undo" title="撤销"></li>
+          <li class="redo" title="恢复"></li>
+          <li class="add" title="添加"></li>
+          <li class="delete d_invalid" title="删除"></li>
+          <li class="copy c_invalid" title="复制"></li>
+        </ul>
+        <div id="editPanel" style="display: none">
+          <div class="selectbox family">
+            <input type="text" value="" />
+            <i></i>
+            <div class="hidlayer" style="display: none">
+              <ul>
+                <li>黑体</li>
+                <li>新蒂下午茶基本版</li>
+                <li>新蒂小丸子小学版</li>
+                <li>迷你简黛玉</li>
+              </ul>
+            </div>
+          </div>
+          <div class="selectbox size">
+            <input type="text" value="" />
+            <i></i>
+            <div class="hidlayer" style="display: none">
+              <ul>
+                <li>12px</li>
+                <li>14px</li>
+                <li>18px</li>
+                <li>24px</li>
+                <li>30px</li>
+                <li>36px</li>
+              </ul>
+            </div>
+          </div>
+          <div class="palette">
+            <div class="blocolor"></div>
+            <em></em>
+          </div>
+          <ul class="align">
+            <li class="bold"></li>
+            <li class="left current"></li>
+            <li class="center"></li>
+            <li class="right last"></li>
+          </ul>
+        </div>
+        <div class="preview">预览</div>
+        <div class="addcart">加入购物车</div>
+      </div>
+    </div>
+    <div id="conbox">
+      <div class="container bbbb">
+        <div class="surface_divide"></div>
+        <img src="images/album_bg_01.jpg" />
+        <div class="controls" style="width: 28%; height: 38%; top: 10%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 24%; height: 38%; left: 62%; top: 55%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_02.jpg" />
+        <div class="controls" style="width: 38%; height: 32%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 30%; height: 26%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_03.jpg" />
+        <div class="controls" style="width: 27%; height: 76%; top: 8%; left: 9%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 24%; height: 38%; left: 70%; top: 10%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 24%; height: 38%; left: 52%; top: 52%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_04.jpg" />
+        <div class="controls" style="width: 34%; height: 49%; top: 24%; left: 9%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 28%; left: 77%; top: 7%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 28%; left: 53%; top: 33%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 28%; left: 77%; top: 63%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_05.jpg" />
+        <div class="controls" style="width: 24%; height: 35%; top: 9%; left: 5%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 24%; height: 35%; left: 21%; top: 55%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 24%; height: 35%; left: 55%; top: 55%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 24%; height: 35%; left: 71%; top: 9%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_06.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_07.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_08.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_09.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_10.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_11.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_12.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_13.jpg" />
+        <div class="controls" style="width: 38%; height: 52%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 18%; height: 32%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+      <div class="container">
+        <img src="images/album_bg_14.jpg" />
+        <div class="controls" style="width: 38%; height: 26%; top: 18%; left: 6%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+        <div class="controls" style="width: 26%; height: 22%; left: 65%; top: 32%;">
+          <div class="imgbox">
+            <div class="imgdrag"><div class="imghandle" style="display: none;"></div></div>
+            <div class="enlarge_bt" style="display: none;"></div>
+            <div class="narrow_bt invalid" style="display: none;"></div>
+          </div>
+          <div class="controlsline controlstop"></div>
+          <div class="controlsline controlsright"></div>
+          <div class="controlsline controlsbottom"></div>
+          <div class="controlsline controlsleft"></div>
+        </div>
+      </div>
+    </div>
+    <div id="pagesbox">
+      <ul id="conpages" class="clearfix">
+        <li class="pages current" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">封面封底</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第1页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第2,3页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第4,5页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第6,7页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第8,9页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第10,11页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第12,13页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第14,15页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第16,17页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第18,19页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第20,21页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第22,23页</div></li>
+        <li class="pages" onclick="Switch(this,'conpages','conbox','li','div')"><i></i><div class="pagenum">第24页</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<script type="text/javascript" src="js/main.js"></script>
+<script type="text/javascript" src="js/undo.js"></script>
+<script type="text/javascript" src="js/stack.js"></script>
+<script type="text/javascript" src="js/palette.js"></script>
+<script type="text/javascript" src="js/modernizr.custom.79639.js"></script>
+<script type="text/javascript" src="js/jquery.bookblock.js"></script>
+</body>
+</html>
